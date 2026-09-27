@@ -34,6 +34,9 @@ export const MARKDOWN_CHANNELS = {
   headlessExportDone: 'markdown:headless-export-done',
   printRequest: 'markdown:print-request',
   aiGenerateImage: 'markdown:ai-generate-image',
+  mcpReady: 'markdown:mcp-ready',
+  mcpCommand: 'markdown:mcp-command',
+  mcpResult: 'markdown:mcp-result',
   getLanguage: 'app:get-language',
   languageChanged: 'app:language-changed',
   getTheme: 'app:get-theme',
@@ -139,6 +142,28 @@ export interface ImageData {
   mime: 'image/png' | 'image/jpeg' | 'image/gif'
 }
 
+/**
+ * MCP bridge: a command pushed from the shell main process into an open markdown
+ * tab so an external agent edits the *visible* document instead of a file behind
+ * it. Commands address top-level blocks and run through the editor's own op
+ * pipeline, so an external edit is undoable and dirties the document like a user
+ * edit.
+ */
+export type McpEditorCommand = 'read_document' | 'insert_content' | 'replace_blocks' | 'apply_ops'
+
+export interface McpCommandMessage {
+  requestId: string
+  command: McpEditorCommand
+  payload: unknown
+}
+
+export interface McpCommandResult {
+  requestId: string
+  ok: boolean
+  result?: unknown
+  error?: string
+}
+
 /** API exposed by preload to the renderer (window.markdownApi) */
 export interface MarkdownApi {
   /** Take the md path pending for this view (queued at tab creation); null = new untitled document */
@@ -235,4 +260,10 @@ export interface MarkdownApi {
     url?: string
     error?: string
   }>
+  /** Subscribe to editor commands pushed by the shell main process (MCP bridge) */
+  onMcpCommand(handler: (message: McpCommandMessage) => void): () => void
+  /** Report a command outcome to the shell, correlated by requestId */
+  reportMcpResult(result: McpCommandResult): void
+  /** Announce that this tab's document is loaded and can accept commands */
+  signalMcpReady(): void
 }

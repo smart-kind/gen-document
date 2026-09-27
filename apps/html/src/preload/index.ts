@@ -5,7 +5,14 @@ import type { AiStreamChunk } from '@genoffice/ai-provider'
 import type { ProjectApi } from '@genoffice/project-store'
 import { installDropOpenBridge } from '@genoffice/electron-utils/drop-open'
 import { AI_CHANNELS, HTML_CHANNELS } from '../shared/ipc'
-import type { AutoSaveDefault, ExportFormat, HtmlApi, SaveMode, UiTheme } from '../shared/ipc'
+import type {
+  AutoSaveDefault,
+  ExportFormat,
+  HtmlApi,
+  McpCommandMessage,
+  SaveMode,
+  UiTheme,
+} from '../shared/ipc'
 
 const api: HtmlApi = {
   consumePending: () => ipcRenderer.invoke(HTML_CHANNELS.consumePending),
@@ -37,6 +44,13 @@ const api: HtmlApi = {
     return () => ipcRenderer.removeListener(HTML_CHANNELS.readTextRequest, listener)
   },
   sendReadTextResult: (result) => ipcRenderer.send(HTML_CHANNELS.readTextResult, result),
+  onMcpCommand: (handler) => {
+    const listener = (_e: Electron.IpcRendererEvent, message: McpCommandMessage) => handler(message)
+    ipcRenderer.on(HTML_CHANNELS.mcpCommand, listener)
+    return () => ipcRenderer.removeListener(HTML_CHANNELS.mcpCommand, listener)
+  },
+  reportMcpResult: (result) => ipcRenderer.send(HTML_CHANNELS.mcpResult, result),
+  signalMcpReady: () => ipcRenderer.send(HTML_CHANNELS.mcpReady),
   onFileRenamed: (handler) => {
     const listener = (_e: Electron.IpcRendererEvent, newPath: string) => handler(newPath)
     ipcRenderer.on(HTML_CHANNELS.fileRenamed, listener)

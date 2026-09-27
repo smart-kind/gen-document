@@ -5,7 +5,14 @@ import type { AiStreamChunk } from '@genoffice/ai-provider'
 import type { ProjectApi } from '@genoffice/project-store'
 import { installDropOpenBridge } from '@genoffice/electron-utils/drop-open'
 import { AI_CHANNELS, MARKDOWN_CHANNELS } from '../shared/ipc'
-import type { AutoSaveDefault, ExportFormat, MarkdownApi, SaveMode, UiTheme } from '../shared/ipc'
+import type {
+  AutoSaveDefault,
+  ExportFormat,
+  MarkdownApi,
+  McpCommandMessage,
+  SaveMode,
+  UiTheme,
+} from '../shared/ipc'
 
 const api: MarkdownApi = {
   consumePending: () => ipcRenderer.invoke(MARKDOWN_CHANNELS.consumePending),
@@ -109,6 +116,14 @@ const api: MarkdownApi = {
     ipcRenderer.invoke(AI_CHANNELS.imageSearch, query, maxResults),
   fetchImage: (url) => ipcRenderer.invoke(AI_CHANNELS.fetchImage, url),
   aiGenerateImage: (op) => ipcRenderer.invoke(MARKDOWN_CHANNELS.aiGenerateImage, op),
+  onMcpCommand: (handler) => {
+    const listener = (_event: Electron.IpcRendererEvent, message: McpCommandMessage) =>
+      handler(message)
+    ipcRenderer.on(MARKDOWN_CHANNELS.mcpCommand, listener)
+    return () => ipcRenderer.removeListener(MARKDOWN_CHANNELS.mcpCommand, listener)
+  },
+  reportMcpResult: (result) => ipcRenderer.send(MARKDOWN_CHANNELS.mcpResult, result),
+  signalMcpReady: () => ipcRenderer.send(MARKDOWN_CHANNELS.mcpReady),
 }
 
 /** Chat persistence: the shared project:* handlers are registered once by the shell (docs-main registerProjectIpc) */

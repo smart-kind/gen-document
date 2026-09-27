@@ -1,0 +1,31 @@
+{
+  "name": "@genoffice/workspace-harness",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "description": "Goal-driven document workspace harness: tool registry with effect dispatch, workspace + read-only reference storage, pi-agent host (no Electron dependency)",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@earendil-works/pi-agent-core": "0.87.1",
+    "@earendil-works/pi-ai": "0.87.1",
+    "@genoffice/agent-core": "*",
+    "@genoffice/ai-provider": "*",
+    "@genoffice/docx-engine": "*",
+    "@genoffice/pptx-engine": "*",
+    "@genoffice/xlsx-gateway": "*",
+    "typebox": "1.3.27"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  }
+}

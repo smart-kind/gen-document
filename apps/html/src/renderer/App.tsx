@@ -59,6 +59,7 @@ import {
 import { compileOps, type HtmlOp, type OpError } from './document/ops'
 import { injectBrief, parseBrief, type Brief } from './document/brief'
 import { applyPatches } from './document/patch'
+import { installHtmlMcpBridge } from './mcp-bridge'
 import { deriveAutoFileName, deriveNameFromPrompt, derivePageTitleName } from './document/auto-name'
 import type { ExportFormat, SaveMode } from '../shared/ipc'
 
@@ -1286,6 +1287,18 @@ export default function App() {
       window.removeEventListener('keydown', onKeyDown, true)
     }
   }, [doSave, runExport, cycleView, zoomIn, zoomOut, flushPending, openFind])
+
+  // MCP visible-editor bridge: an external agent edits this open source buffer in
+  // place. Edits are dispatched into the same CodeMirror view the user types in,
+  // so they land in its undo history and commit through onEditorChange like any
+  // other edit. The bridge polls for the mounted view itself and announces ready.
+  useEffect(
+    () =>
+      installHtmlMcpBridge({
+        getView: () => editorRef.current?.view() ?? null,
+      }),
+    [],
+  )
 
   // pinch / ctrl+wheel over the stage chrome around the frame; wheel inside the frame arrives as gx:zoom
   useEffect(() => {

@@ -25,6 +25,8 @@ export interface SourceEditorHandle {
   focus(): void
   /** adapter for the find/replace panel; null until the editor is mounted */
   findTarget(): FindTarget | null
+  /** live editor view (the MCP bridge dispatches its edits through it); null until mounted */
+  view(): EditorView | null
 }
 
 export interface CursorInfo {
@@ -150,6 +152,7 @@ export const SourceEditor = forwardRef<SourceEditorHandle, Props>(function Sourc
     canRedo: () => (viewRef.current ? redoDepth(viewRef.current.state) > 0 : false),
     focus: () => viewRef.current?.focus(),
     findTarget: () => findTargetRef.current,
+    view: () => viewRef.current,
   }))
 
   return <div ref={hostRef} className={className} />

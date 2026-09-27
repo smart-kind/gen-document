@@ -48,6 +48,7 @@ import type { DiagramLanguage } from './editor/diagrams'
 import { resolveImageSrc } from './editor/localImage'
 import type { ExportFormat, SaveMode } from '../shared/ipc'
 import { uiOp } from './editor/ops'
+import { installMarkdownMcpBridge, type MarkdownMcpContext } from './mcp-bridge'
 
 type LoadStatus = 'loading' | 'ready' | 'error'
 type SaveState = 'idle' | 'saving' | 'saved' | 'failed'
@@ -241,6 +242,26 @@ export default function App() {
   })
   editorRef.current = editor
   filePathRef.current = filePath
+
+  const mcpContextRef = useRef<MarkdownMcpContext | null>(null)
+  mcpContextRef.current =
+    status === 'ready' && editor
+      ? {
+          editor,
+          readDocument: () =>
+            serializeMarkdown(
+              envelopeRef.current,
+              editor.state.doc,
+              () => bodyMarkdown(editor),
+              originalSourceRef.current,
+            ),
+        }
+      : null
+
+  // MCP bridge: let an external agent drive this visible editor. Commands run
+  // against the live document through the editor's own op pipeline; the context
+  // ref keeps the bridge from holding a stale closure.
+  useEffect(() => installMarkdownMcpBridge({ getContext: () => mcpContextRef.current }), [])
 
   useEffect(() => {
     localStorage.setItem('mdapp.spellcheck', spellcheck ? '1' : '0')

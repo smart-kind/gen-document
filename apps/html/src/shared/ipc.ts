@@ -20,6 +20,11 @@ export const HTML_CHANNELS = {
   saveRequestAck: 'html:save-request-ack',
   readTextRequest: 'html:read-text-request',
   readTextResult: 'html:read-text-result',
+  // MCP visible-editor bridge: shell pushes one command, the renderer that owns
+  // the open CodeMirror source executes it and reports the correlated result
+  mcpCommand: 'html:mcp-command',
+  mcpResult: 'html:mcp-result',
+  mcpReady: 'html:mcp-ready',
   dirtyChanged: 'html:dirty-changed',
   closeSaveRequest: 'html:close-save-request',
   closeSaveResult: 'html:close-save-result',
@@ -185,6 +190,26 @@ export interface ImageData {
   mime: 'image/png' | 'image/jpeg' | 'image/gif'
 }
 
+/**
+ * MCP bridge: an editor command pushed from the shell main process into an open
+ * html tab so an external agent edits the *visible* source editor. Positions are
+ * 1-based line numbers over the source text `read_document` returns.
+ */
+export type McpEditorCommand = 'read_document' | 'insert_content' | 'replace_blocks' | 'apply_ops'
+
+export interface McpCommandMessage {
+  requestId: string
+  command: McpEditorCommand
+  payload: unknown
+}
+
+export interface McpCommandResult {
+  requestId: string
+  ok: boolean
+  result?: unknown
+  error?: string
+}
+
 /** API exposed by preload to the renderer (window.htmlApi) */
 export interface HtmlApi {
   /** Take the md path pending for this view (queued at tab creation); null = new untitled document */
@@ -221,6 +246,14 @@ export interface HtmlApi {
    */
   onReadTextRequest(handler: () => void): () => void
   sendReadTextResult(result: { text: string } | { error: string }): void
+  /**
+   * MCP visible-editor bridge (see renderer/mcp-bridge.ts): the shell pushes one
+   * command at a time; the renderer executes it and reports the correlated
+   * result. onMcpCommand returns unsubscribe.
+   */
+  onMcpCommand(handler: (message: McpCommandMessage) => void): () => void
+  reportMcpResult(result: McpCommandResult): void
+  signalMcpReady(): void
   /** Main process picked "Save" in the close prompt → renderer saves and replies via sendCloseSaveResult */
   onCloseSaveRequest(handler: () => void): () => void
   sendCloseSaveResult(ok: boolean): void

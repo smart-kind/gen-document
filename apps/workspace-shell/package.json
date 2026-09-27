@@ -1,0 +1,43 @@
+{
+  "name": "@genoffice/workspace-shell",
+  "productName": "GenOffice Workspace",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "description": "Goal-driven document workspace shell: workspace selector, file tree, conversation list and an agent-driven chat panel around the editor apps' WebContentsView factories",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev --watch",
+    "build": "electron-vite build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "start": "electron-vite build && electron ."
+  },
+  "devDependencies": {
+    "@genoffice/agent-core": "*",
+    "@genoffice/ai-provider": "*",
+    "@genoffice/docs": "*",
+    "@genoffice/docx-engine": "*",
+    "@genoffice/electron-utils": "*",
+    "@genoffice/html": "*",
+    "@genoffice/i18n": "*",
+    "@genoffice/markdown": "*",
+    "@genoffice/pdf": "*",
+    "@genoffice/pptx-engine": "*",
+    "@genoffice/sheets": "*",
+    "@genoffice/slides": "*",
+    "@genoffice/ui": "*",
+    "@genoffice/workspace-harness": "*",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.0.4",
+    "electron": "^43.3.0",
+    "electron-vite": "^5.0.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "^4.1.11"
+  },
+  "author": "GenOffice"
+}
